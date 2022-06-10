@@ -1,6 +1,6 @@
 {
     "name": "laravel/lumen",
-    "description": "The Laravel Lumen Framework.",
+    "description": "Cengage Code Challenge",
     "keywords": ["framework", "laravel", "lumen"],
     "license": "MIT",
     "type": "project",

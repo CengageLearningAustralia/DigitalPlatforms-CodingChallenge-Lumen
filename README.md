@@ -4,7 +4,7 @@ This coding challenge has been created to evaluate the skills of a PHP developer
 
 ## Challenge
 
-The aim of this exercise is to implement a session management API where teachers can schedule teaching sessions and assign books for the session.
+The aim of this exercise is to implement a teaching session management API where users can schedule teaching sessions and assign books for the session.
 
 The supplied codebase includes:
 
@@ -18,22 +18,19 @@ The test is tiered with an increasingly difficult set of requirements. **Only th
 
 -   Develop endpoints to get a specific session by ID and to create a new session. A session should belong to a particular user and should have the following attributes:
     -   An ID
-    -   A name
-    -   Start date time
-    -   End date time
--   Develop an endpoint to get all the user’s sessions. The results should be sorted from oldest to newest based on start date time.
+    -   A name for the session
+    -   A date the session will occur
+-   Develop an endpoint to get all the user’s sessions. The results should be sorted from oldest to newest based on date provided.
 -   Users should not be able to access sessions that belong to other users.
 
 ### Tier two
 
 -   Develop an endpoint to assign one book to a given session. A session should be able to have multiple books assigned if this endpoint is called multiple times.
--   Include details of the assigned books when getting a specific session by ID.
+-   Include details of the assigned books in the response of tier one.
 
 ### Tier three
 
 -   Add a filter to the endpoint that gets all sessions. If the filter is enabled, sessions that have occurred in the past should be included in the returned data. If the filter is not provided, the endpoint should by default return only sessions that occur in the future.
--   Add an endpoint to remove a session.
--   Add an endpoint to remove a book from a session.
 
 ## Submission instructions
 
