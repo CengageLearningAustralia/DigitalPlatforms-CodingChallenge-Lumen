@@ -16,11 +16,12 @@ The test is tiered with an increasingly difficult set of requirements. **Only th
 
 ### Tier one
 
--   Develop endpoints to get a specific session by ID and to create a new session. A session should belong to a particular user and should have the following attributes:
+-   Develop an endpoint to create a new session. A session should belong to a particular user and should have the following attributes:
     -   An ID
     -   A name for the session
     -   A date the session will occur
--   Develop an endpoint to get all the user’s sessions. The results should be sorted from oldest to newest based on date provided.
+-   Develop an endpoint to return a session by ID
+-   Develop an endpoint to get all of the user’s sessions. The results should be sorted from oldest to newest based on date provided.
 -   Users should not be able to access sessions that belong to other users.
 
 ### Tier two
