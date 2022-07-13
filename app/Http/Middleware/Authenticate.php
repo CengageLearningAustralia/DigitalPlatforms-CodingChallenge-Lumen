@@ -37,7 +37,7 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
         if ($this->auth->guard($guard)->guest()) {
-            return response()->json(['message' => 'Inavlid bearer token.'], HttpResponse::HTTP_UNAUTHORIZED);
+            return response()->json(['message' => 'Invalid bearer token.'], HttpResponse::HTTP_UNAUTHORIZED);
         }
 
         return $next($request);
