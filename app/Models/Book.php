@@ -31,7 +31,9 @@ class Book extends Model
     /**
      * @return HasManyThrough
      */
-    public function books(){
-        return $this->hasManyThrough(Session::class, SessionBook::class, 'book_id', 'id', 'id', 'session_id');
+    public function books()
+    {
+        return $this->hasManyThrough(Session::class, SessionBook::class,
+            'book_id', 'id', 'id', 'session_id');
     }
 }

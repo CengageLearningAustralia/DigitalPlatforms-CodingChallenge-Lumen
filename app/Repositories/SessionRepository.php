@@ -2,10 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\Book;
 use App\Models\Session;
 use App\Repositories\Interfaces\SessionRepositoryInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Carbon;
 use Throwable;
 
 /**
@@ -20,7 +21,7 @@ class SessionRepository implements SessionRepositoryInterface
 
     /**
      * SessionRepository constructor.
-     * @param  Session  $session
+     * @param Session $session
      */
     public function __construct(Session $session)
     {
@@ -32,11 +33,12 @@ class SessionRepository implements SessionRepositoryInterface
      * @return bool
      * @throws Throwable
      */
-    public function create($data){
+    public function create(array $data)
+    {
         return $this->model->create([
-            'user_id'=>$data['user_id'],
-            'name'=>$data['name'],
-            'start_at'=>$data['start_at'],
+            'user_id' => $data['user_id'],
+            'name' => $data['name'],
+            'start_at' => $data['start_at'],
         ]);
     }
 
@@ -47,29 +49,25 @@ class SessionRepository implements SessionRepositoryInterface
      * @throws Throwable
      * @throws ModelNotFoundException
      */
-    public function getById(int $sessionId, bool $exceptionExpected=false){
+    public function getById(int $sessionId, bool $exceptionExpected = false)
+    {
         return $exceptionExpected ? $this->model->findOrFail($sessionId) : $this->model->find($sessionId);
     }
 
     /**
      * @param int $userId
      * @param array $with
-     * @return Session
+     * @param array $filters
+     * @return Builder
      * @throws Throwable
      */
-    public function getByUserId(int $userId, array $with=[]){
-        return $this->model->where('user_id',$userId)
-            ->with($with)
-            ->orderBy('start_at')
-            ->paginate();
-    }
-
-    /**
-     * @param Session $session
-     * @param Book $book
-     * @throws Throwable
-     */
-    public function assignBook(Session $session, Book $book){
-        return $session->books()->attach($book->id);
+    public function getByUserId(int $userId, array $with = [], array $filters = [])
+    {
+        $builder = $this->model->where('user_id', $userId);
+        if (!empty($filters['includePastSessions']) && $filters['includePastSessions'] !== "true") {
+            $builder->where('start_at', '>=', Carbon::now());
+        }
+        return $builder->with($with)
+            ->orderBy('start_at');
     }
 }

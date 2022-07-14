@@ -3,11 +3,11 @@
 use App\Models\Book;
 use App\Models\Session;
 use App\Models\User;
+use App\Repositories\Interfaces\SessionRepositoryInterface;
 use Illuminate\Http\Response;
 
 class SessionTest extends TestCase
 {
-
     /**
      *
      * @return void
@@ -17,7 +17,41 @@ class SessionTest extends TestCase
         $this->actingAs(User::whereHas('sessions')->inRandomOrder()->first());
         $this->get("/sessions/index");
         $this->assertResponseOk();
-        $this->response->assertJsonStructure(['data'=>[0=>['id']]]);
+        $this->response->assertJsonStructure(['data' => [0 => ['id']]]);
+        $this->response->assertJsonStructure(['meta']);
+    }
+
+    /**
+     *
+     * @return void
+     */
+    public function test_sessions_only_future_sessions_returned()
+    {
+        $user = User::whereHas('sessions')->inRandomOrder()->first();
+        $this->actingAs($user);
+        $this->get("/sessions/index?filters[includePastSessions]=false");
+        $filters = ['includePastSessions' => "false"];
+        $sessionsBuilder = app(SessionRepositoryInterface::class)->getByUserId($user->id, [], $filters);
+        $this->assertResponseOk();
+        $this->response->assertJsonCount($sessionsBuilder->count(), 'data');
+        $this->response->assertJsonStructure(['data' => [0 => ['id']]]);
+        $this->response->assertJsonStructure(['meta']);
+    }
+
+    /**
+     *
+     * @return void
+     */
+    public function test_sessions_all_sessions_returned()
+    {
+        $user = User::whereHas('sessions')->inRandomOrder()->first();
+        $this->actingAs($user);
+        $this->get("/sessions/index?filters[includePastSessions]=true");
+        $filters = ['includePastSessions' => "true"];
+        $sessionsBuilder = app(SessionRepositoryInterface::class)->getByUserId($user->id, [], $filters);
+        $this->assertResponseOk();
+        $this->response->assertJsonCount($sessionsBuilder->count(), 'data');
+        $this->response->assertJsonStructure(['data' => [0 => ['id']]]);
         $this->response->assertJsonStructure(['meta']);
     }
 
@@ -39,8 +73,9 @@ class SessionTest extends TestCase
      */
     public function test_show()
     {
-        $this->actingAs(User::inRandomOrder()->first());
-        $session = Session::inRandomOrder()->first();
+        $user = User::whereHas('sessions')->inRandomOrder()->first();
+        $this->actingAs($user);
+        $session = Session::where('user_id', $user->id)->inRandomOrder()->first();
 
         $this->get("/sessions/{$session->id}/show");
 
@@ -57,7 +92,7 @@ class SessionTest extends TestCase
     {
         $user = User::inRandomOrder()->first();
         $this->actingAs($user);
-        $session = Session::where('user_id','!=',$user->id)->inRandomOrder()->first();
+        $session = Session::where('user_id', '!=', $user->id)->inRandomOrder()->first();
 
         $res = $this->get("/sessions/{$session->id}/show");
 

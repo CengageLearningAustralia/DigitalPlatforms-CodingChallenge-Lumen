@@ -48,7 +48,9 @@ class SessionController extends Controller
     public function index()
     {
         try {
-            return SessionResource::collection($this->repository->getByUserId(request()->user()->id, ['books']));
+            $filters = request()->query('filters', []);
+            return SessionResource::collection($this->repository->getByUserId(request()->user()->id, ['books'], $filters)
+                ->paginate());
         } catch (Throwable $e) {
             report($e);
             return response()->json(['errors' => ['Something went wrong.'], Response::HTTP_INTERNAL_SERVER_ERROR]);
@@ -60,7 +62,7 @@ class SessionController extends Controller
     {
         try {
             $session = $this->repository->getById($sessionId, true);
-            throw_if(request()->user()->cannot('view', $session), UnauthorizedException::class, 'Unauthorized');
+            throw_if(request()->user()->cannot('view', $session), UnauthorizedException::class, 'Unauthorized', Response::HTTP_FORBIDDEN);
             return (new SessionResource($session->loadMissing('books')))->jsonSerialize();
         } catch (ModelNotFoundException|UnauthorizedException $e) {
             return response()->json(['errors' => [$e->getMessage()]], $e->getCode());

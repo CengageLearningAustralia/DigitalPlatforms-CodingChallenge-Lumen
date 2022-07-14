@@ -32,7 +32,7 @@ class BookRepository implements BookRepositoryInterface
      * @return bool
      * @throws Throwable
      */
-    public function create($data){
+    public function create(array $data){
         return $this->model->create([
             'name'=>$data['name'],
             'author'=>$data['author'],
