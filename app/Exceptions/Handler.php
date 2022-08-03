@@ -4,9 +4,12 @@ namespace App\Exceptions;
 
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -49,6 +52,59 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if ($exception instanceof AuthorizationException) {
+            return response()->json(
+                ['message' => $exception->getMessage()],
+                HttpResponse::HTTP_FORBIDDEN
+            );
+        }
+
+        if ($exception instanceof NotFoundHttpException) {
+            return response()->json(
+                ['message' => "Resource not found for {$request->getPathInfo()}."],
+                HttpResponse::HTTP_NOT_FOUND
+            );
+        }
+
+        if ($exception instanceof ModelNotFoundException) {
+            // Get model name from class string
+            $modelName = substr(strrchr($exception->getModel(), '\\'), 1);
+            return response()->json(
+                ['message' => "{$modelName} not found."],
+                HttpResponse::HTTP_NOT_FOUND
+            );
+        }
+
+        if ($exception instanceof MethodNotAllowedHttpException) {
+            $acceptableMethods = implode(',', $exception->getHeaders());
+
+            return response()->json(
+                ['message' => "{$request->getMethod()} method not allowed for this resource. Acceptable methods: {$acceptableMethods}."],
+                HttpResponse::HTTP_METHOD_NOT_ALLOWED
+            );
+        }
+
+        if ($exception instanceof HttpException) {
+            return response()->json(
+                ['message' => $exception->getMessage()],
+                $exception->getStatusCode()
+            );
+        }
+
+        if ($exception instanceof ValidationException) {
+            return response()->json(
+                ['errors' => $exception->validator->errors()],
+                $exception->status
+            );
+        }
+
+        if (env('APP_DEBUG') === false) {
+            return response()->json(
+                ['message' => 'A server error has occurred.'],
+                HttpResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+        
         return parent::render($request, $exception);
     }
 }
